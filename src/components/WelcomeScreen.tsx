@@ -24,7 +24,7 @@ interface WelcomeScreenProps {
   onResumeAutosave?: () => void;
 }
 
-const WELCOME_LOGO_SRC = '/assets/aistudio/OpenMixStudioLogo_new_69f73222.jpeg';
+const WELCOME_LOGO_SRC = './assets/aistudio/OpenMixStudioLogo_new_69f73222.jpeg';
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   pendingAutosaveName,
