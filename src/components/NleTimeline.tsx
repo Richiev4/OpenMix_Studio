@@ -579,8 +579,12 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({
     window.addEventListener('pointercancel', onUp);
   };
 
+  const hasFloatingMenuPos = floatingMenuPos !== null;
+  const floatingMenuPosRef = useRef(floatingMenuPos);
+  floatingMenuPosRef.current = floatingMenuPos;
+
   useEffect(() => {
-    if (!floatingMenuPos) return;
+    if (!hasFloatingMenuPos) return;
     const clampToViewport = () => {
       const panel = floatingMenuRef.current;
       const panelW = panel?.offsetWidth ?? Math.min(620, window.innerWidth - 24);
@@ -597,7 +601,7 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({
     };
     window.addEventListener('resize', clampToViewport);
     return () => window.removeEventListener('resize', clampToViewport);
-  }, [floatingMenuPos]);
+  }, [hasFloatingMenuPos]);
 
   const activePlayheadMixPair = useMemo(() => {
     const t = project.playheadSec;
@@ -754,30 +758,28 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({
   const isFloatingMenuOpen = isDynamicMixViewActive || Boolean(clipMenuState);
 
   const toggleDynamicMixMenu = () => {
-    setDynamicMixMenuEnabled((prev) => {
-      const next = !prev;
-      if (next) {
-        setDismissedMixKey(null);
-      } else if (!clipMenuState && activePlayheadMixPair) {
-        const useOut =
-          selectedClipRef && selectedClipRef.clipId === activePlayheadMixPair.outClip.id;
-        const targetTrack = useOut
-          ? activePlayheadMixPair.outTrack
-          : activePlayheadMixPair.inTrack;
-        const targetClip = useOut
-          ? activePlayheadMixPair.outClip
-          : activePlayheadMixPair.inClip;
-        const rect = floatingMenuRef.current?.getBoundingClientRect();
-        setClipMenuTopOffset(0);
-        setClipMenuState({
-          trackId: targetTrack.id,
-          clipId: targetClip.id,
-          x: rect ? Math.round(rect.left) : Math.round((window.innerWidth - 600) / 2),
-          y: rect ? Math.round(rect.top) : Math.max(8, window.innerHeight - 360),
-        });
-      }
-      return next;
-    });
+    const next = !dynamicMixMenuEnabled;
+    setDynamicMixMenuEnabled(next);
+    if (next) {
+      setDismissedMixKey(null);
+    } else if (!clipMenuState && activePlayheadMixPair) {
+      const useOut =
+        selectedClipRef && selectedClipRef.clipId === activePlayheadMixPair.outClip.id;
+      const targetTrack = useOut
+        ? activePlayheadMixPair.outTrack
+        : activePlayheadMixPair.inTrack;
+      const targetClip = useOut
+        ? activePlayheadMixPair.outClip
+        : activePlayheadMixPair.inClip;
+      const rect = floatingMenuRef.current?.getBoundingClientRect();
+      setClipMenuTopOffset(0);
+      setClipMenuState({
+        trackId: targetTrack.id,
+        clipId: targetClip.id,
+        x: rect ? Math.round(rect.left) : Math.round((window.innerWidth - 600) / 2),
+        y: rect ? Math.round(rect.top) : Math.max(8, window.innerHeight - 360),
+      });
+    }
   };
 
   const closeFloatingMenu = () => {
@@ -829,29 +831,32 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({
   }, [isFloatingMenuOpen, activePlayheadMixPair]);
 
   useLayoutEffect(() => {
-    if (!isFloatingMenuOpen || !floatingMenuRef.current) return;
+    if (!isFloatingMenuOpen || isDraggingFloatingMenu || !floatingMenuRef.current) return;
     const rect = floatingMenuRef.current.getBoundingClientRect();
     const maxBottom = window.innerHeight - 8;
-    if (rect.bottom > maxBottom) {
+    if (rect.bottom > maxBottom + 0.5) {
       const overflow = rect.bottom - maxBottom;
-      if (floatingMenuPos) {
+      if (floatingMenuPosRef.current) {
+        const targetY = Math.max(8, Math.floor(rect.top - overflow));
         setFloatingMenuPos((prev) => {
           if (!prev) return prev;
-          const nextY = Math.max(8, Math.round(prev.y - overflow));
+          const nextY = Math.min(prev.y, targetY);
           return nextY === prev.y ? prev : { x: prev.x, y: nextY };
         });
       } else if (clipMenuState) {
-        setClipMenuTopOffset((prev) => {
-          const clamped = Math.max(-(clipMenuState.y - 4), prev - overflow);
-          return Math.abs(clamped - prev) < 0.5 ? prev : clamped;
-        });
+        const shiftUp = Math.ceil(overflow);
+        const maxUpward = Math.max(0, Math.round(rect.top) - 8);
+        const appliedShift = Math.min(shiftUp, maxUpward);
+        if (appliedShift >= 1) {
+          setClipMenuTopOffset((prev) => prev - appliedShift);
+        }
       }
     }
   }, [
     isFloatingMenuOpen,
     isDynamicMixViewActive,
+    isDraggingFloatingMenu,
     clipMenuState,
-    floatingMenuPos,
     showBeatGridEditor,
     showClipMixEditor,
     clipMixDirection,

@@ -303,25 +303,57 @@ function AppStudio() {
   const timelineMixInfo = useMemo(() => {
     const info = new Map<
       string,
-      { trackId: string; clipId: string; presetId: MixPresetId; startSec: number }
+      {
+        trackId: string;
+        clipId: string;
+        presetId: MixPresetId;
+        startSec: number;
+        mixWindows: Array<{ startSec: number; endSec: number }>;
+      }
     >();
     for (const lane of nleProject.tracks) {
       for (const clip of lane.clips) {
         const ctx = findIncomingMixContext(nleProject.tracks, lane.id, clip);
         if (!ctx) continue;
+        const mixWindow =
+          ctx.overlapSec > 0.01
+            ? { startSec: clip.startSec, endSec: clip.startSec + ctx.overlapSec }
+            : null;
         const existing = info.get(clip.trackAssetId);
-        if (!existing || clip.startSec < existing.startSec) {
+        if (!existing) {
           info.set(clip.trackAssetId, {
             trackId: lane.id,
             clipId: clip.id,
             presetId: detectClipMixPreset(clip, ctx.pairedPrevClip),
             startSec: clip.startSec,
+            mixWindows: mixWindow ? [mixWindow] : [],
           });
+        } else {
+          if (mixWindow) existing.mixWindows.push(mixWindow);
+          if (clip.startSec < existing.startSec) {
+            existing.trackId = lane.id;
+            existing.clipId = clip.id;
+            existing.presetId = detectClipMixPreset(clip, ctx.pairedPrevClip);
+            existing.startSec = clip.startSec;
+          }
         }
       }
     }
     return info;
   }, [nleProject.tracks]);
+
+  const activeMixTrackIds = useMemo(() => {
+    const active = new Set<string>();
+    const playhead = nleProject.playheadSec;
+    for (const [trackAssetId, item] of timelineMixInfo) {
+      if (
+        item.mixWindows.some((w) => playhead >= w.startSec && playhead <= w.endSec)
+      ) {
+        active.add(trackAssetId);
+      }
+    }
+    return active;
+  }, [timelineMixInfo, nleProject.playheadSec]);
 
   const playingTrackProgress = useMemo(() => {
     const progressMap = new Map<string, number>();
@@ -3080,6 +3112,7 @@ function AppStudio() {
             tracks={tracks}
             timelineTrackCounts={timelineTrackCounts}
             timelineMixInfo={timelineMixInfo}
+            activeMixTrackIds={activeMixTrackIds}
             onChangeMixPreset={handleChangeTrackMixPreset}
             playingTrackProgress={playingTrackProgress}
             importingCount={importingCount}

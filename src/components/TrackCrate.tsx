@@ -56,6 +56,7 @@ interface TrackCrateProps {
     string,
     { trackId: string; clipId: string; presetId: MixPresetId }
   >;
+  activeMixTrackIds?: Set<string>;
   onChangeMixPreset?: (
     trackId: string,
     clipId: string,
@@ -92,6 +93,7 @@ export const TrackCrate: React.FC<TrackCrateProps> = ({
   tracks,
   timelineTrackCounts,
   timelineMixInfo,
+  activeMixTrackIds,
   onChangeMixPreset,
   playingTrackProgress,
   importingCount,
@@ -439,7 +441,7 @@ export const TrackCrate: React.FC<TrackCrateProps> = ({
             {/* Sticky Highlighted Sortable Column Headers */}
             <div
               role="row"
-              className="sticky top-0 z-10 grid grid-cols-[26px_54px_minmax(150px,1fr)_68px_86px_64px_124px_112px] items-stretch bg-om-elevated/95 backdrop-blur-sm border-b border-white/[0.1] text-[10px] font-mono uppercase tracking-wider"
+              className="sticky top-0 z-10 grid grid-cols-[26px_54px_minmax(150px,1fr)_68px_86px_64px_136px_112px] items-stretch bg-om-elevated/95 backdrop-blur-sm border-b border-white/[0.1] text-[10px] font-mono uppercase tracking-wider"
             >
               <div className="border-r border-white/[0.04]" aria-hidden="true" />
 
@@ -569,6 +571,7 @@ export const TrackCrate: React.FC<TrackCrateProps> = ({
                   const timelineCount = timelineTrackCounts?.get(track.id) ?? 0;
                   const isOnTimeline = timelineCount > 0;
                   const mixInfo = timelineMixInfo?.get(track.id);
+                  const isPlayheadOverMix = Boolean(mixInfo && activeMixTrackIds?.has(track.id));
                   const timelineProgress = playingTrackProgress?.get(track.id);
                   const isTimelinePlaying = timelineProgress !== undefined;
                   const isPreviewing = previewTrackId === track.id;
@@ -649,7 +652,7 @@ export const TrackCrate: React.FC<TrackCrateProps> = ({
                         </>
                       )}
 
-                      <div className="relative z-[1] grid grid-cols-[26px_54px_minmax(150px,1fr)_68px_86px_64px_124px_112px] items-stretch">
+                      <div className="relative z-[1] grid grid-cols-[26px_54px_minmax(150px,1fr)_68px_86px_64px_136px_112px] items-stretch">
                         {/* Drag Handle */}
                         <div
                           className="pl-2 pr-0.5 py-2 flex items-center justify-center text-om-text-icon group-hover:text-om-text-muted cursor-grab active:cursor-grabbing border-r border-white/[0.04]"
@@ -776,51 +779,79 @@ export const TrackCrate: React.FC<TrackCrateProps> = ({
 
                         {/* Mix Preset */}
                         <div
-                          className="px-1.5 py-1.5 flex items-center justify-center border-r border-white/[0.04]"
+                          className={`px-1.5 py-1.5 flex items-center justify-center border-r border-white/[0.04] transition-colors ${
+                            isPlayheadOverMix ? 'bg-om-accent/[0.12]' : ''
+                          }`}
                           onMouseDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {mixInfo ? (
-                            <select
-                              aria-label={`Mix preset for ${track.name}`}
-                              value={mixInfo.presetId}
-                              disabled={!onChangeMixPreset}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                if (val !== 'custom' && onChangeMixPreset) {
-                                  onChangeMixPreset(
-                                    mixInfo.trackId,
-                                    mixInfo.clipId,
-                                    val as Exclude<MixPresetId, 'custom'>
-                                  );
+                            <div className="w-full flex items-center gap-1.5 min-w-0">
+                              <span
+                                role={isPlayheadOverMix ? 'status' : undefined}
+                                aria-label={
+                                  isPlayheadOverMix
+                                    ? `Playhead is currently over ${track.name} mix`
+                                    : undefined
                                 }
-                              }}
-                              title={
-                                mixInfo.presetId === 'custom'
-                                  ? 'Mix transition has been manually edited (select a preset to reset)'
-                                  : 'Active mix preset with previous track (change preset)'
-                              }
-                              className={`w-full rounded px-1.5 py-1 text-[10px] font-mono border focus:outline-none focus:border-om-accent/70 cursor-pointer truncate transition-colors ${
-                                mixInfo.presetId === 'custom'
-                                  ? 'bg-om-secondary/12 border-om-secondary/35 text-om-secondary-bright'
-                                  : 'bg-om-accent/10 border-om-accent/30 text-om-accent-bright hover:bg-om-accent/15'
-                              }`}
-                            >
-                              {mixInfo.presetId === 'custom' && (
-                                <option value="custom" disabled>
-                                  Custom
-                                </option>
-                              )}
-                              {MIX_PRESETS.map((preset) => (
-                                <option
-                                  key={preset.id}
-                                  value={preset.id}
-                                  className="bg-om-panel text-om-text"
-                                >
-                                  {preset.label}
-                                </option>
-                              ))}
-                            </select>
+                                title={
+                                  isPlayheadOverMix
+                                    ? 'Playhead is currently over this mix'
+                                    : undefined
+                                }
+                                className={`w-2 h-2 rounded-full shrink-0 transition-opacity ${
+                                  isPlayheadOverMix
+                                    ? 'bg-om-accent om-playhead-beam opacity-100'
+                                    : 'opacity-0 pointer-events-none'
+                                }`}
+                              />
+                              <select
+                                aria-label={`Mix preset for ${track.name}`}
+                                value={mixInfo.presetId}
+                                disabled={!onChangeMixPreset}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val !== 'custom' && onChangeMixPreset) {
+                                    onChangeMixPreset(
+                                      mixInfo.trackId,
+                                      mixInfo.clipId,
+                                      val as Exclude<MixPresetId, 'custom'>
+                                    );
+                                  }
+                                }}
+                                title={
+                                  isPlayheadOverMix
+                                    ? 'Playhead is currently over this mix (change preset)'
+                                    : mixInfo.presetId === 'custom'
+                                      ? 'Mix transition has been manually edited (select a preset to reset)'
+                                      : 'Active mix preset with previous track (change preset)'
+                                }
+                                className={`flex-1 min-w-0 rounded px-1.5 py-1 text-[10px] font-mono border focus:outline-none focus:border-om-accent/70 cursor-pointer truncate transition-colors ${
+                                  mixInfo.presetId === 'custom'
+                                    ? isPlayheadOverMix
+                                      ? 'bg-om-secondary/20 border-om-secondary text-om-secondary-bright ring-1 ring-om-secondary/45 font-semibold'
+                                      : 'bg-om-secondary/12 border-om-secondary/35 text-om-secondary-bright'
+                                    : isPlayheadOverMix
+                                      ? 'bg-om-accent/20 border-om-accent text-om-accent-bright ring-1 ring-om-accent/45 font-semibold'
+                                      : 'bg-om-accent/10 border-om-accent/30 text-om-accent-bright hover:bg-om-accent/15'
+                                }`}
+                              >
+                                {mixInfo.presetId === 'custom' && (
+                                  <option value="custom" disabled>
+                                    Custom
+                                  </option>
+                                )}
+                                {MIX_PRESETS.map((preset) => (
+                                  <option
+                                    key={preset.id}
+                                    value={preset.id}
+                                    className="bg-om-panel text-om-text"
+                                  >
+                                    {preset.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           ) : (
                             <span className="text-[11px] font-mono text-om-text-icon">—</span>
                           )}
