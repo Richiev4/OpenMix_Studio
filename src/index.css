@@ -1,0 +1,271 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@theme inline {
+  /* Semantic Surface Tokens */
+  --color-om-deepest: var(--om-bg-deepest);
+  --color-om-base: var(--om-bg-base);
+  --color-om-well: var(--om-bg-well);
+  --color-om-sub: var(--om-bg-sub);
+  --color-om-footer: var(--om-bg-footer);
+  --color-om-panel: var(--om-bg-panel);
+  --color-om-panel-alt: var(--om-bg-panel-alt);
+  --color-om-elevated: var(--om-bg-elevated);
+  --color-om-hover: var(--om-bg-hover);
+  --color-om-card: var(--om-bg-card);
+  --color-om-control: var(--om-bg-control);
+  --color-om-control-alt: var(--om-bg-control-alt);
+  --color-om-control-hover: var(--om-bg-control-hover);
+  --color-om-track-border: var(--om-border-track);
+
+  /* Semantic Text Tokens */
+  --color-om-text: var(--om-text-primary);
+  --color-om-text-secondary: var(--om-text-secondary);
+  --color-om-text-muted: var(--om-text-muted);
+  --color-om-text-dim: var(--om-text-dim);
+  --color-om-text-subtle: var(--om-text-subtle);
+  --color-om-text-faint: var(--om-text-faint);
+  --color-om-text-icon: var(--om-text-icon);
+
+  /* Semantic Accent Tokens */
+  --color-om-accent: var(--om-accent);
+  --color-om-accent-bright: var(--om-accent-bright);
+  --color-om-accent-soft: var(--om-accent-soft);
+  --color-om-accent-ink: var(--om-accent-ink);
+
+  --color-om-secondary: var(--om-secondary);
+  --color-om-secondary-bright: var(--om-secondary-bright);
+
+  --color-om-positive: var(--om-positive);
+  --color-om-positive-bright: var(--om-positive-bright);
+  --color-om-positive-soft: var(--om-positive-soft);
+
+  --color-om-danger: var(--om-danger);
+  --color-om-danger-bright: var(--om-danger-bright);
+  --color-om-danger-soft: var(--om-danger-soft);
+}
+
+@layer base {
+  :root,
+  :root[data-theme="studio-amber"] {
+    color-scheme: dark;
+
+    /* Surfaces — Studio Amber (original palette) */
+    --om-bg-deepest: #090B0E;
+    --om-bg-base: #0B0D10;
+    --om-bg-well: #0E1116;
+    --om-bg-sub: #0F1217;
+    --om-bg-footer: #101318;
+    --om-bg-panel: #13161B;
+    --om-bg-panel-alt: #13171F;
+    --om-bg-elevated: #161B24;
+    --om-bg-hover: #191D24;
+    --om-bg-card: #1A1E26;
+    --om-bg-control: #1B2029;
+    --om-bg-control-alt: #1F242D;
+    --om-bg-control-hover: #242B37;
+    --om-border-track: #232832;
+    --om-scroll-thumb: #262C36;
+    --om-scroll-thumb-hover: #37404E;
+
+    /* Text — Studio Amber */
+    --om-text-primary: #E6EAF0;
+    --om-text-secondary: #C5CCD9;
+    --om-text-muted: #9AA3B2;
+    --om-text-dim: #8D96A6;
+    --om-text-subtle: #7D8696;
+    --om-text-faint: #6E7787;
+    --om-text-icon: #5B6474;
+
+    /* Accents — Studio Amber */
+    --om-accent: #F59E0B;
+    --om-accent-bright: #FBBF24;
+    --om-accent-soft: #FDE68A;
+    --om-accent-ink: #0B0D10;
+
+    --om-secondary: #06B6D4;
+    --om-secondary-bright: #22D3EE;
+
+    --om-positive: #10B981;
+    --om-positive-bright: #34D399;
+    --om-positive-soft: #A7F3D0;
+
+    --om-danger: #EF4444;
+    --om-danger-bright: #F87171;
+    --om-danger-soft: #FCA5A5;
+
+    --om-playhead-glow: 0 0 8px rgba(245, 158, 11, 0.7);
+  }
+
+  :root[data-theme="om-neon"] {
+    color-scheme: dark;
+
+    /* Surfaces — OM Neon (deep obsidian-slate inspired by OM image) */
+    --om-bg-deepest: #080B11;
+    --om-bg-base: #0B0F17;
+    --om-bg-well: #0E131F;
+    --om-bg-sub: #101624;
+    --om-bg-footer: #101625;
+    --om-bg-panel: #121826;
+    --om-bg-panel-alt: #141B2B;
+    --om-bg-elevated: #172034;
+    --om-bg-hover: #192338;
+    --om-bg-card: #1A243A;
+    --om-bg-control: #1C263D;
+    --om-bg-control-alt: #202C46;
+    --om-bg-control-hover: #273657;
+    --om-border-track: #253250;
+    --om-scroll-thumb: #29385A;
+    --om-scroll-thumb-hover: #3B4F7D;
+
+    /* Text — OM Neon */
+    --om-text-primary: #EDF4FF;
+    --om-text-secondary: #C8D8F2;
+    --om-text-muted: #93A7C9;
+    --om-text-dim: #8397BA;
+    --om-text-subtle: #7185A8;
+    --om-text-faint: #607496;
+    --om-text-icon: #506385;
+
+    /* Accents — OM Neon (Electric Cyan, Neon Magenta, Electric Violet) */
+    --om-accent: #22E4FF;
+    --om-accent-bright: #67F0FF;
+    --om-accent-soft: #A5F8FF;
+    --om-accent-ink: #06111A;
+
+    --om-secondary: #D946EF;
+    --om-secondary-bright: #F06BFF;
+
+    --om-positive: #7C5CFF;
+    --om-positive-bright: #A78BFA;
+    --om-positive-soft: #DDD6FE;
+
+    --om-danger: #FB4D72;
+    --om-danger-bright: #FF7A96;
+    --om-danger-soft: #FECDD3;
+
+    --om-playhead-glow: 0 0 12px rgba(34, 228, 255, 0.85);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--om-bg-base);
+    color: var(--om-text-primary);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.om-playhead-beam {
+  box-shadow: var(--om-playhead-glow);
+}
+
+/* Studio matte scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--om-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--om-scroll-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--om-scroll-thumb-hover);
+}
+
+/* Custom hardware range slider baseline */
+input[type="range"].studio-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].studio-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--om-border-track);
+}
+
+input[type="range"].studio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--om-text-primary);
+  border: 1px solid var(--om-bg-base);
+  margin-top: -5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+input[type="range"].studio-slider-amber::-webkit-slider-thumb {
+  background: var(--om-accent);
+}
+
+input[type="range"].studio-slider-cyan::-webkit-slider-thumb {
+  background: var(--om-secondary);
+}
+
+/* Welcome screen arrival zoom & action fade */
+@keyframes om-welcome-zoom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes om-welcome-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.om-welcome-zoom {
+  animation: om-welcome-zoom-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.om-welcome-actions {
+  animation: om-welcome-fade-up 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .om-welcome-zoom,
+  .om-welcome-actions {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+

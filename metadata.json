@@ -1,0 +1,6 @@
+{
+  "name": "Obsidian Deck Studio",
+  "description": "Precision DJ music workstation and non-linear multi-track audio editor with real-time pitch-preserving time stretching, automated beat matching, seamless looping, automation curves, and lossless WAV/WebM mix export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
